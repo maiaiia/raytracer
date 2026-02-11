@@ -73,8 +73,17 @@ extension Vec3 {
     static func * (lhs: Double, rhs: Vec3) -> Vec3 {
         return rhs * lhs
     }
+    static func * (lhs: Vec3, rhs: Int) -> Vec3 {
+        return lhs * Double(rhs)
+    }
+    static func * (lhs: Int, rhs: Vec3) -> Vec3 {
+        return Double(lhs) * rhs
+    }
     static func / (lhs: Vec3, rhs: Double) -> Vec3 {
         return lhs * (1.0 / rhs)
+    }
+    static func / (lhs: Vec3, rhs: Int) -> Vec3 {
+        return lhs / Double(rhs)
     }
     
     static func += (lhs: inout Vec3, rhs: Vec3) {
@@ -86,7 +95,13 @@ extension Vec3 {
     static func *= (lhs: inout Vec3, rhs: Double) {
         lhs = lhs * rhs
     }
+    static func *= (lhs: inout Vec3, rhs: Int) {
+        lhs = lhs * rhs
+    }
     static func /= (lhs: inout Vec3, rhs: Double) {
+        lhs = lhs / rhs
+    }
+    static func /= (lhs: inout Vec3, rhs: Int) {
         lhs = lhs / rhs
     }
 }

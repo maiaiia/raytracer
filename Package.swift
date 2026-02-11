@@ -4,12 +4,12 @@ import PackageDescription
 let package = Package(
     name: "raytracer",
     products: [
-        .library(
+        .executable(
             name: "RayTracer",  // Product name
             targets: ["RayTracer"]),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "RayTracer"),
     ]
 )
