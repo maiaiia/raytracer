@@ -8,7 +8,7 @@ struct Sphere: Hittable {
         _radius = radius
     }
     
-    func hit(r: Ray, rayTMin: Double, rayTMax: Double) -> HitRecord? {
+    func hit(r: Ray, rayT: Interval) -> HitRecord? {
         let OC = _center - r.origin()
         let a = r.direction().length_squared
         let h = r.direction().dot(OC)
@@ -21,9 +21,9 @@ struct Sphere: Hittable {
         
         let sqrtd = sqrt(delta)
         var root = (h - sqrtd) / a
-        if root <= rayTMin || root >= rayTMax {
+        if !rayT.surrounds(root) {
             root = (h + sqrtd) / a
-            if root <= rayTMin || root >= rayTMax {
+            if !rayT.surrounds(root) {
                 return nil
             }
         }

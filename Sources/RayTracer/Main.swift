@@ -1,26 +1,12 @@
 import Foundation
 
-func hitSphere(center: Point3, radius: Double, r: Ray) -> Double{
-    let OC = center - r.origin()
-    let a = r.direction().dot(r.direction())
-    let b = -2 * r.direction().dot(OC)
-    let c = OC.dot(OC) - radius * radius
-    let delta = b * b - 4 * a * c
-    if delta < 0 {
-        return -1.0 //not hit
-    } else {
-        return ( -b - sqrt(delta)) / (2.0 * a) // normal
-    }
-}
-
-func rayColor(r: Ray) -> Color {
-    let t = hitSphere(center: Point3(0, 0, -1), radius: 0.5, r: r)
-    if t > 0.0 {
-        let normalVector = (r.at(t: t) - Point3(0, 0, -1)).normalized // so each component is in the range [-1, 1]
-        return 0.5 * Color(normalVector.x + 1, normalVector.y + 1, normalVector.z + 1)
-        // add 1 to each component to shift the values to [0, 2]. halve to map values to [0, 1]
+func rayColor(r: Ray, world: any Hittable) -> Color {
+    // hit objects
+    if let record = world.hit(r: r, rayT: Interval(0.0001, Double.infinity)) {
+        return 0.5 * (record.normal + Color(1.0, 1.0, 1.0))
     }
     
+    // gradient background
     let unitDirection = r.direction().normalized
     let a: Double = 0.5 * (unitDirection.y + 1.0) // lerp
     return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.7, 1.0)
@@ -31,6 +17,11 @@ func main() {
     let aspectRatio: Double = 16.0 / 9.0
     let imageWidth: Int = 400
     let imageHeight: Int = Int(Double(imageWidth) / aspectRatio) < 1 ? 1 : Int(Double(imageWidth) / aspectRatio)
+    
+    // World
+    var world: HittableList = HittableList()
+    world.add(Sphere(center: Point3(0, 0, -1), radius: 0.5))
+    world.add(Sphere(center: Point3(1.5, 0, -1), radius: 0.5))
     
     // Camera
     let focalLength: Double = 1.0
@@ -60,7 +51,7 @@ func main() {
             let rayDirection = pixelCenter - cameraCenter
             let ray = Ray(origin: cameraCenter, direction: rayDirection)
             
-            let pixelColor = rayColor(r: ray)
+            let pixelColor = rayColor(r: ray, world: world)
             writeColor(pixelColor: pixelColor)
         }
     }

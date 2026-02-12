@@ -18,5 +18,5 @@ struct HitRecord {
 }
 
 protocol Hittable {
-    func hit(r: Ray, rayTMin: Double, rayTMax: Double) -> HitRecord?
+    func hit(r: Ray, rayT: Interval) -> HitRecord?
 }
