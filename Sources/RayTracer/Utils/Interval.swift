@@ -26,4 +26,15 @@ struct Interval {
     func surrounds(_ value: Double) -> Bool {
         value > left && value < right
     }
+    
+    func clamp(_ x: Double) -> Double {
+        if x < left {
+            return left
+        }
+        if x > right {
+            return right
+        }
+        return x
+    }
+    
 }
