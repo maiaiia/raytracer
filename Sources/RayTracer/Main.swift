@@ -7,7 +7,7 @@ func main() {
     world.add(Sphere(center: Point3(1.5, -100.5, -1), radius: 100))
     
     // Render
-    let camera = Camera(aspectRatio: 16.0 / 9.0, imageWidth: 400)
+    let camera = Camera(aspectRatio: 16.0 / 9.0, imageWidth: 400, samplesPerPixel: 100, maxDepth: 50)
     camera.render(world: world)
 }
 

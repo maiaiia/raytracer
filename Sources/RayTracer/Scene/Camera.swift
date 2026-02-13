@@ -1,19 +1,22 @@
 import Foundation
 struct Camera {
-    private var imageHeight: Int            // final image height
-    private var cameraCenter: Point3        // camera center
-    private var pixel00: Point3             // location of pixel 0, 0
-    private var pixelDX: Vec3               // offset to pixel to the right
-    private var pixelDY: Vec3               // offset to pixel below
-    private var pixelSamplesScale: Double
+    private var imageHeight:        Int         // final image height
+    private var cameraCenter:       Point3      // camera center
+    private var pixel00:            Point3      // location of pixel 0, 0
+    private var pixelDX:            Vec3        // offset to pixel to the right
+    private var pixelDY:            Vec3        // offset to pixel below
+    private var pixelSamplesScale:  Double
     
-    var aspectRatio = 1.0
-    var imageWidth = 100
-    var samplesPerPixel = 10
+    var aspectRatio     = 1.0
+    var imageWidth      = 100
+    var samplesPerPixel = 10    // count of random samples per pixel
+    var maxDepth        = 10    // maximum number of ray bounces into scene
     
-    init(aspectRatio: Double = 1.0, imageWidth: Int = 100, samplesPerPixel: Int = 10) {
+    init(aspectRatio: Double = 1.0, imageWidth: Int = 100, samplesPerPixel: Int = 10, maxDepth: Int = 10) {
         self.aspectRatio = aspectRatio
         self.imageWidth = imageWidth
+        self.samplesPerPixel = samplesPerPixel
+        self.maxDepth = maxDepth
         
         imageHeight = Int(Double(imageWidth) / aspectRatio) < 1 ? 1 : Int(Double(imageWidth) / aspectRatio)
         cameraCenter = Point3(0,0,0)
@@ -47,7 +50,7 @@ struct Camera {
                 var pixelColor = Color(0, 0, 0)
                 for _ in 0...samplesPerPixel{
                     let ray = self.getRay(i, j)
-                    pixelColor += self.rayColor(r: ray, world: world)
+                    pixelColor += self.rayColor(r: ray, depth: maxDepth, world: world)
                 }
                 writeColor(pixelColor: pixelColor * pixelSamplesScale)
             }
@@ -55,9 +58,13 @@ struct Camera {
         standardError.write("\rDone.\n".data(using: .utf8)!)
     }
     
-    private func rayColor(r: Ray, world: any Hittable) -> Color {
+    private func rayColor(r: Ray, depth: Int, world: any Hittable) -> Color {
+        if depth <= 0{
+            return Color(0, 0, 0)
+        }
         if let record = world.hit(r: r, rayT: Interval(0.0001, Double.infinity)) {
-            return 0.5 * (record.normal + Color(1.0, 1.0, 1.0))
+            let direction = Vec3.randomOnHemisphere(normal: record.normal)
+            return 0.5 * (rayColor(r: Ray(origin: record.p, direction: direction), depth: depth - 1, world: world))
         }
         
         // gradient background
