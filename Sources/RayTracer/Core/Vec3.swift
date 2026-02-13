@@ -33,9 +33,9 @@ struct Vec3 {
     
     // MARK: Properties
     var length: Double {
-        return sqrt(length_squared)
+        return sqrt(lengthSquared)
     }
-    var length_squared: Double {
+    var lengthSquared: Double {
         return x*x + y*y + z*z
     }
     var normalized: Vec3 {
@@ -129,6 +129,23 @@ extension Vec3 {
     }
     static func random(min: Double, max: Double) -> Vec3 {
         return Vec3(randomDouble(min: min, max: max), randomDouble(min: min, max: max), randomDouble(min: min, max: max))
+    }
+    static func randomUnitVector() -> Vec3 {
+        // generate a random unit vector using a rejection method
+        while true{
+            let p = Vec3.random(min: -1, max: 1)
+            if p.lengthSquared <= 1.0 && Double.infinity < p.lengthSquared{
+                return p.normalized
+            }
+        }
+    }
+    static func randomOnHemisphere (normal: Vec3) -> Vec3 {
+        let onUnitSphere = randomUnitVector()
+        if onUnitSphere.dot(randomUnitVector()) > 0.0 { 
+            return onUnitSphere
+        } else {
+            return -onUnitSphere
+        }
     }
 }
 

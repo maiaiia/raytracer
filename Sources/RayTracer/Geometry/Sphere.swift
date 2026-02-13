@@ -10,9 +10,9 @@ struct Sphere: Hittable {
     
     func hit(r: Ray, rayT: Interval) -> HitRecord? {
         let OC = _center - r.origin()
-        let a = r.direction().length_squared
+        let a = r.direction().lengthSquared
         let h = r.direction().dot(OC)
-        let c = OC.length_squared - _radius * _radius
+        let c = OC.lengthSquared - _radius * _radius
         
         let delta = h * h - a * c
         if delta < 0 {
