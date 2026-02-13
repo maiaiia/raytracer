@@ -1,11 +1,13 @@
 import Foundation
 struct Sphere: Hittable {
-    private var _center: Point3
-    private var _radius: Double
+    private var _center:    Point3
+    private var _radius:    Double
+    private var _material:  any Material
     
-    init(center: Point3, radius: Double) {
+    init(center: Point3, radius: Double, material: Material) {
         _center = center
-        _radius = radius
+        _radius = radius > 0 ? radius : 0
+        _material = material
     }
     
     func hit(r: Ray, rayT: Interval) -> HitRecord? {
@@ -30,6 +32,8 @@ struct Sphere: Hittable {
         return HitRecord(t: root,
                          p: r.at(t: root),
                          r: r,
-                         outwardNormal: (r.at(t: root) - _center) / _radius)
+                         outwardNormal: (r.at(t: root) - _center) / _radius,
+                         material: _material
+        )
     }
 }

@@ -41,6 +41,10 @@ struct Vec3 {
     var normalized: Vec3 {
         return self / length
     }
+    var nearZero: Bool {
+        let eps = 1e-8
+        return abs(x) < eps && abs(y) < eps && abs(z) < eps
+    }
     
 }
 
@@ -54,6 +58,9 @@ extension Vec3 {
         let newY = z * other.x - x * other.z
         let newZ = x * other.y - y * other.x
         return Vec3(newX, newY, newZ)
+    }
+    func hadamard(_ other: Vec3) -> Vec3 {
+        return Vec3(x * other.x, y * other.y, z * other.z)
     }
 }
 
@@ -146,6 +153,13 @@ extension Vec3 {
         } else {
             return -onUnitSphere
         }
+    }
+}
+
+// MARK: Geometry
+extension Vec3 {
+    func reflect(relativeTo normal: Vec3) -> Vec3 {
+        self - 2 * self.dot(normal) * normal
     }
 }
 

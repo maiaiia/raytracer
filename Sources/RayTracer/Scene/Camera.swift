@@ -63,14 +63,17 @@ struct Camera {
             return Color(0, 0, 0)
         }
         if let record = world.hit(r: r, rayT: Interval(0.0001, Double.infinity)) {
-            let direction = Vec3.randomUnitVector() + record.normal
-            return 0.5 * (rayColor(r: Ray(origin: record.p, direction: direction),depth: depth - 1, world: world))
+            if let scatter = record.material.scatter(ray: r, rec: record) {
+                return scatter.attenuation.hadamard(rayColor(r: scatter.scattered, depth: depth - 1, world: world))
+            } else {
+                return Color(0.0, 0.0, 0.0)
+            }
         }
         
         // gradient background
         let unitDirection = r.direction().normalized
         let a: Double = 0.5 * (unitDirection.y + 1.0) // lerp
-        return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.7, 1.0)
+        return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.6, 1.0)
     }
     
     private func getRay(_ i: Int, _ j: Int) -> Ray{
