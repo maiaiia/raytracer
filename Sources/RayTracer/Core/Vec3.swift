@@ -31,7 +31,7 @@ struct Vec3 {
         }
     }
     
-     
+    // MARK: Properties
     var length: Double {
         return sqrt(length_squared)
     }
@@ -42,6 +42,10 @@ struct Vec3 {
         return self / length
     }
     
+}
+
+// MARK: Operations with Vectors
+extension Vec3 {
     func dot(_ other: Vec3) -> Double {
         return x * other.x + y * other.y + z * other.z
     }
@@ -115,6 +119,16 @@ extension Vec3: CustomStringConvertible {
 extension Vec3: Equatable {
     static func == (lhs: Vec3, rhs: Vec3) -> Bool {
         lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
+    }
+}
+
+// MARK: Random utility functions
+extension Vec3 {
+    static func random() -> Vec3 {
+        return Vec3(randomDouble(), randomDouble(), randomDouble())
+    }
+    static func random(min: Double, max: Double) -> Vec3 {
+        return Vec3(randomDouble(min: min, max: max), randomDouble(min: min, max: max), randomDouble(min: min, max: max))
     }
 }
 
