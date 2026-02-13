@@ -6,12 +6,12 @@ func main() {
     
     let groundMaterial = Lambertian(albedo: Color(0.8, 0.8, 0.0))
     let centerMaterial = Lambertian(albedo: Color(0.1, 0.2, 0.5))
-    let leftMaterial = Metal(albedo: Color(0.8, 0.8, 0.8))
-    let rightMaterial = Metal(albedo: Color(0.8, 0.6, 0.2))
+    let leftMaterial = Metal(albedo: Color(0.8, 0.8, 0.8), fuzz: 0.3)
+    let rightMaterial = Metal(albedo: Color(0.8, 0.6, 0.2), fuzz: 1.0)
     
     world.add(Sphere(center: Point3(1.5, -100.5, -1), radius: 100, material: groundMaterial))
     world.add(Sphere(center: Point3(0.0, 0.0, -1.2), radius: 0.5, material: centerMaterial))
-    world.add(Sphere(center: Point3(-1.5, 0, -1.5), radius: 0.5, material: leftMaterial))
+    world.add(Sphere(center: Point3(-1.0, 0, -1.0), radius: 0.5, material: leftMaterial))
     world.add(Sphere(center: Point3(1.0, 0.0, -1.0), radius: 0.5, material: rightMaterial))
     
     // Render
