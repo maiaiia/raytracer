@@ -1,13 +1,13 @@
 import Foundation
 struct Dielectric : Material {
-    private var _refractionIndex: Double
-    init(refractionIndex: Double) {
-        self._refractionIndex = refractionIndex
+    private var _refractiveIndex: Double
+    init(refractiveIndex: Double) {
+        self._refractiveIndex = refractiveIndex
     }
     
     func scatter(ray: Ray, rec: HitRecord) -> (attenuation: Vec3, scattered: Ray)? {
         let attenuation = Color(1.0, 1.0, 1.0) // for glass
-        let refractionIndex = rec.frontFace ? 1.0 / self._refractionIndex : self._refractionIndex
+        let refractionIndex = rec.frontFace ? 1.0 / self._refractiveIndex : self._refractiveIndex
         
         let unitDirection = ray.direction().normalized
         
