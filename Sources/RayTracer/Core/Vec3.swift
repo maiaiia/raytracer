@@ -134,7 +134,7 @@ extension Vec3 {
         // generate a random unit vector using a rejection method
         while true{
             let p = Vec3.random(min: -1, max: 1)
-            if p.lengthSquared <= 1.0 && Double.infinity < p.lengthSquared{
+            if p.lengthSquared <= 1.0 && 1e-160 < p.lengthSquared{
                 return p.normalized
             }
         }
