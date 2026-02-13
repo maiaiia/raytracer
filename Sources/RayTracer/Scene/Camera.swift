@@ -63,8 +63,8 @@ struct Camera {
             return Color(0, 0, 0)
         }
         if let record = world.hit(r: r, rayT: Interval(0.0001, Double.infinity)) {
-            let direction = Vec3.randomOnHemisphere(normal: record.normal)
-            return 0.5 * (rayColor(r: Ray(origin: record.p, direction: direction), depth: depth - 1, world: world))
+            let direction = Vec3.randomUnitVector() + record.normal
+            return 0.5 * (rayColor(r: Ray(origin: record.p, direction: direction),depth: depth - 1, world: world))
         }
         
         // gradient background
