@@ -6,7 +6,7 @@ func main() {
     
     let groundMaterial = Lambertian(albedo: Color(0.8, 0.8, 0.0))
     let centerMaterial = Lambertian(albedo: Color(0.1, 0.2, 0.5))
-    let leftMaterial = Metal(albedo: Color(0.8, 0.8, 0.8), fuzz: 0.3)
+    let leftMaterial = Dielectric(refractionIndex: 1.00 / 1.33)
     let rightMaterial = Metal(albedo: Color(0.8, 0.6, 0.2), fuzz: 1.0)
     
     world.add(Sphere(center: Point3(1.5, -100.5, -1), radius: 100, material: groundMaterial))

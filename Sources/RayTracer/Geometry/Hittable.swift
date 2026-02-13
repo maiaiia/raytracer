@@ -6,13 +6,14 @@ struct HitRecord {
     var normal:     Vec3
     var t:          Double
     var material:   any Material
+    var frontFace:  Bool
     
     init(t: Double, p: Point3, r: Ray, outwardNormal: Vec3, material: any Material) {
         self.t = t
         self.p = p
         
         // set face normal
-        let frontFace: Bool = r.direction().dot(outwardNormal) < 0
+        self.frontFace = r.direction().dot(outwardNormal) < 0
         self.normal = frontFace ? outwardNormal : -outwardNormal
         self.material = material
     }

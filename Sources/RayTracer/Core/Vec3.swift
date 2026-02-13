@@ -161,6 +161,15 @@ extension Vec3 {
     func reflect(relativeTo normal: Vec3) -> Vec3 {
         self - 2 * self.dot(normal) * normal
     }
+    func refract(normal: Vec3, etaRatio: Double) -> Vec3 {
+        // etaRatio = etaIncident / etaTransmitted
+        
+        // the refracted ray is decomposed into its perpendicular and parallel components to ease computations
+        let cosTheta = min(-self.dot(normal), 1.0)
+        let outRayPerpendicular = etaRatio * (self + cosTheta * normal)
+        let outRayParallel = -sqrt(abs(1.0 - outRayPerpendicular.lengthSquared)) * normal
+        return outRayParallel + outRayPerpendicular
+    }
 }
 
 typealias Point3 = Vec3
