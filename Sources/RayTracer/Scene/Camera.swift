@@ -11,12 +11,14 @@ struct Camera {
     var imageWidth      = 100
     var samplesPerPixel = 10    // count of random samples per pixel
     var maxDepth        = 10    // maximum number of ray bounces into scene
+    var vfov            = 90    // vertical view angle (field of view)
     
-    init(aspectRatio: Double = 1.0, imageWidth: Int = 100, samplesPerPixel: Int = 10, maxDepth: Int = 10) {
+    init(aspectRatio: Double = 1.0, imageWidth: Int = 100, samplesPerPixel: Int = 10, maxDepth: Int = 10, vfov: Int = 90) {
         self.aspectRatio = aspectRatio
         self.imageWidth = imageWidth
         self.samplesPerPixel = samplesPerPixel
         self.maxDepth = maxDepth
+        self.vfov = vfov
         
         imageHeight = Int(Double(imageWidth) / aspectRatio) < 1 ? 1 : Int(Double(imageWidth) / aspectRatio)
         cameraCenter = Point3(0,0,0)
@@ -24,9 +26,11 @@ struct Camera {
         
         //Viewport info
         //  dimensions
-        let focalLength: Double = 1.0
-        let viewportHeight: Double = 2.0
-        let viewportWidth: Double = viewportHeight * (Double(imageWidth) / Double (imageHeight))
+        let focalLength = 1.0
+        let theta = degreesToRadians(Double(vfov))
+        let h = tan(theta / 2)
+        let viewportHeight = 2 * h * focalLength
+        let viewportWidth = viewportHeight * (Double(imageWidth) / Double (imageHeight))
         
         //  rendering direction
         let u = Vec3(viewportWidth, 0, 0)

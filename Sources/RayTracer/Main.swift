@@ -4,18 +4,15 @@ func main() {
     // World
     var world: HittableList = HittableList()
     
-    let groundMaterial = Lambertian(albedo: Color(0.8, 0.8, 0.0))
-    let centerMaterial = Lambertian(albedo: Color(0.1, 0.2, 0.5))
+    let R = cos(Double.pi / 4)
+    let leftMaterial = Lambertian(albedo: Color(0, 0, 1))
+    let rightMaterial = Lambertian(albedo: Color(1, 0, 0))
     /*
     let leftMaterial = Dielectric(refractionIndex: 1.00 / 1.33)
     let rightMaterial = Metal(albedo: Color(0.8, 0.6, 0.2), fuzz: 1.0)*/
     
-    world.add(Sphere(center: Point3(1.5, -100.5, -1), radius: 100, material: groundMaterial))
-    world.add(Sphere(center: Point3(0.0, 0.0, -1.2), radius: 0.5, material: centerMaterial))
-    world.add(Sphere(center: Point3(-1.0, 0, -1.0), radius: 0.5, material: Dielectric.airBubble))
-    world.add(Sphere(center: Point3(1.0, 0.0, -1.0), radius: 0.5, material: Metal.gold))
-    world.add(Sphere(center: Point3(-0.5, -0.5, -0.5), radius: 0.2, material: Metal.copper))
-    world.add(Sphere(center: Point3(0.5, -0.3, -0.5), radius: 0.2, material: Dielectric.glass))
+    world.add(Sphere(center: Point3(-R, 0, -1), radius: R, material: leftMaterial))
+    world.add(Sphere(center: Point3(R, 0, -1), radius: R, material: rightMaterial))
     
     // Render
     let camera = Camera(aspectRatio: 16.0 / 9.0, imageWidth: 400, samplesPerPixel: 100, maxDepth: 50)

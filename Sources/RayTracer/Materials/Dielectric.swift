@@ -14,10 +14,19 @@ struct Dielectric : Material {
         // Check if the ray gets reflected or refracted
         let cosTheta = min(1.0, -unitDirection.dot(rec.normal))
         let sinTheta = sqrt(1.0 - cosTheta * cosTheta)
+         
+        let cannotRefract: Bool = refractionIndex * sinTheta > 1.0
         
-        let direction = refractionIndex * sinTheta > 1.0 ? unitDirection.reflect(relativeTo: rec.normal) : unitDirection.refract(normal: rec.normal, etaRatio: refractionIndex)
+        let direction = (cannotRefract && Dielectric.reflectance(cosine: cosTheta, refractiveIndex: refractionIndex) > randomDouble()) ? unitDirection.reflect(relativeTo: rec.normal) : unitDirection.refract(normal: rec.normal, etaRatio: refractionIndex)
         
         let scattered = Ray(origin: rec.p, direction: direction)
         return (attenuation, scattered)
+    }
+    
+    static private func reflectance(cosine: Double, refractiveIndex: Double) -> Double {
+        // Schlick's approximation for reflectance
+        var r = (1 - refractiveIndex) / (1 + refractiveIndex)
+        r = r * r
+        return r + (1 - r) * pow(1.0 - cosine, 5.0)
     }
 }
