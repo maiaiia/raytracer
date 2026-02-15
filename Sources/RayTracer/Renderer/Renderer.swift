@@ -79,13 +79,10 @@ struct Renderer {
     private func renderMultithreaded(camera: Camera, world: any Hittable) {
         // data will be written in a buffer
         // in terms of parallelism i have found that the main options are bucket and progressive rendering
-        // i'll go for a hybrid approach and maybe allow some configurations (render bucket size, no. of workers per bucket) later on
-        //      1. split the image into equal-sized render buckets (64x64) and have a separate thread for each tile --> faster, more efficient
-        //      2. use multiple threads for each indiviual tile and spread the pixel samples among them --> more flexible and interactive (but i am scared to tackle that rn )
-        // for 1. note that there are no race conditions, as
-        // however, method 2 does imply some race conditions, since i'll also be distributing the number of samples per pixel among multiple threads
-        // thus, i'll only need to synchronise between threads belonging to the same tile
-        // in other words, i'll use a mutex per tile but no mutex over the entirety of the buffer
+        // i'll go for a hybrid approach and maybe allow some configurations (render bucket size, refresh rate) later on
+        //      1. split the image into equal-sized render buckets (64x64) and have a separate thread for each tile
+        //      2. don't take all samples per pixel in one go (go by 10 sample increments)
+        // note that Swift's RandomNumberGenerator is both thread safe and each thread has a different seed (automatically)
         
         let height = camera.imageHeight
         let width = camera.imageWidth
@@ -96,23 +93,31 @@ struct Renderer {
         let bucketsQueue = DispatchQueue.global(qos: .userInitiated)
         let renderBuffer = RenderBuffer(size: width * height)
         
-        for x in 0..<horizontalBuckets { //TODO: handle errors
-            for y in 0..<verticalBuckets {
-                bucketsGroup.enter()
-                bucketsQueue.async {
-                    renderBucket(
-                        camera: camera, world: world,
-                        leftCornerX: x * self.bucketSize, leftCornerY: y * self.bucketSize,
-                        renderBuffer: renderBuffer,
-                    )
-                    bucketsGroup.leave( )
+        
+        let standardError = FileHandle.standardError
+        
+        let iterations = (samplesPerPixel + 10) / 10
+        for iteration in 0..<iterations {
+            standardError.write("\rRemaining samples: \(iterations - iteration) \n".data(using: .utf8)!)
+            for x in 0..<horizontalBuckets { //TODO: handle errors
+                for y in 0..<verticalBuckets {
+                    bucketsGroup.enter()
+                    bucketsQueue.async {
+                        renderBucket(
+                            camera: camera,
+                            world: world,
+                            leftCornerX: x * self.bucketSize,
+                            leftCornerY: y * self.bucketSize,
+                            renderBuffer: renderBuffer,
+                            sampleCount: (iteration == iterations - 1) ? iterations % 10 : 10
+                        )
+                        bucketsGroup.leave( )
+                    }
                 }
             }
+            bucketsGroup.wait()
         }
-        bucketsGroup.wait()
         
-        // TODO: change stdout
-        let standardError = FileHandle.standardError
         print("P3\n\(width) \(height)\n255")
         for pixel in renderBuffer.pixels {
             writeColor(pixelColor: pixel * pixelSamplesScale)
@@ -120,29 +125,28 @@ struct Renderer {
         standardError.write("\rDone.\n".data(using: .utf8)!)
     }
     private func renderBucket(
-        camera: Camera, world: any Hittable,
-        leftCornerX: Int, leftCornerY: Int,
+        camera: Camera,
+        world: any Hittable,
+        leftCornerX: Int,
+        leftCornerY: Int,
         renderBuffer: RenderBuffer,
+        sampleCount: Int
     ) {
-        // assume only one worker per bucket for now
         
         let iMax = min(leftCornerX + bucketSize, camera.imageWidth)
         let jMax = min(leftCornerY + bucketSize, camera.imageHeight)
         
-        let standardError = FileHandle.standardError
-        standardError.write("\rEntering bucket \(leftCornerX) \(leftCornerY) \n".data(using: .utf8)!)
+        //let standardError = FileHandle.standardError
+        //standardError.write("\rEntering bucket \(leftCornerX) \(leftCornerY) \n".data(using: .utf8)!)
         for j in leftCornerY..<jMax{
-            /*
-            let message = "\rScanlines remaining: \(height - j) \n"
-            standardError.write(message.data(using: .utf8)!)*/
             for i in leftCornerX..<iMax{
                 let currentPixel = j * camera.imageWidth + i
-                for _ in 0..<samplesPerPixel{
+                for _ in 0..<sampleCount{
                     let ray = camera.getRay(i, j)
                     renderBuffer.pixels[currentPixel] += rayColor(r: ray, depth: maxDepth, world: world)
                 }
             }
         }
-        standardError.write("\rBucket \(leftCornerX) \(leftCornerY) complete \n".data(using: .utf8)!)
+        //standardError.write("\rBucket \(leftCornerX) \(leftCornerY) complete \n".data(using: .utf8)!)
     }
 }
