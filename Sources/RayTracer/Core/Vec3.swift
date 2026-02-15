@@ -154,6 +154,12 @@ extension Vec3 {
             return -onUnitSphere
         }
     }
+    static func randomInUnitDisk() -> Vec3 {
+        while true {
+            let p = Vec3(randomDouble(min: -1, max: 1), randomDouble(min: -1, max: 1), 0)
+            if p.lengthSquared < 1 { return p }
+        }
+    }
 }
 
 // MARK: Geometry

@@ -20,9 +20,11 @@ func main() {
         imageWidth: 400,
         samplesPerPixel: 100,
         maxDepth: 50,
-        //vfov: 20,
-        //lookFrom: Point3(-2, 2, 1),
-        //lookAt: Point3(0, 0, -1)
+        vfov: 20,
+        lookFrom: Point3(-2, 2, 1),
+        lookAt: Point3(0, 0, -1),
+        defocusAngle: 10.0,
+        focusDistance: 3.4
     )
     camera.render(world: world)
 }

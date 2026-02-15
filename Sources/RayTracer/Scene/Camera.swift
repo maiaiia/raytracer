@@ -11,14 +11,18 @@ struct Camera {
     var lookAt      = Point3(0, 0, -1)  // point camera is looking at
     var vUp         = Vec3(0, 1, 0)     // camera-relative "up" direction
     
+    var defocusAngle    = 0.0       // aperture size (0 - everything is in focus)
+    var focusDistance   = 10.0      // distance from camera lookFrom to focus plane
+    
     // MARK: private properties
     private var imageHeight:        Int         // final image height
     private var cameraCenter:       Point3      // camera center
     private var pixel00:            Point3      // location of pixel 0, 0
-    private var pixelDX:            Vec3        // offset to pixel to the right
-    private var pixelDY:            Vec3        // offset to pixel below
+    private var pixelDX, pixelDY:   Vec3        // offset to pixel to the right / below
     private var pixelSamplesScale:  Double
     private var u, v, w:            Vec3        // camera frame basis vectors
+    private var defocusDiskU:       Vec3        // defocus disk horizontal radius
+    private var defocusDiskV:       Vec3        // defocus disk vertical radius
     
     // MARK: computed properties
     var focalLength: Double {
@@ -34,7 +38,9 @@ struct Camera {
         vfov: Int = 90,
         lookFrom: Point3 = Point3(0, 0, 0),
         lookAt: Point3 = Point3(0, 0, -1),
-        vUp: Vec3 = Vec3(0, 1, 0)
+        vUp: Vec3 = Vec3(0, 1, 0),
+        defocusAngle: Double = 0.0,
+        focusDistance: Double = 10.0
     ) {
         self.aspectRatio = aspectRatio
         self.imageWidth = imageWidth
@@ -44,6 +50,8 @@ struct Camera {
         self.lookFrom = lookFrom
         self.lookAt = lookAt
         self.vUp = vUp
+        self.defocusAngle = defocusAngle
+        self.focusDistance = focusDistance
         
         // calculate derived values
         cameraCenter = lookFrom
@@ -57,17 +65,18 @@ struct Camera {
         pixel00 = Point3(0, 0, 0)
         pixelDY = Point3(0, 0, 0)
         pixelDX = Point3(0, 0, 0)
-        
+        defocusDiskU = Vec3(0, 0, 0)
+        defocusDiskV = Vec3(0, 0, 0)
         setupViewport()
     }
     
     // MARK: Setup
     private mutating func setupViewport() {
         // viewport dimensions
-        let focalLength = (lookFrom - lookAt).length
+        //let focalLength = (lookFrom - lookAt).length
         let theta = degreesToRadians(Double(vfov))
         let h = tan(theta / 2)
-        let viewportHeight = 2 * h * focalLength
+        let viewportHeight = 2 * h * focusDistance
         let viewportWidth = viewportHeight * (Double(imageWidth) / Double (imageHeight))
         
         // camera basis vectors
@@ -84,8 +93,13 @@ struct Camera {
         pixelDY = viewportV / imageHeight
         
         // upper left pixel
-        let viewportUpperLeft = cameraCenter - (focalLength * w) - 0.5 * (viewportU + viewportV)
+        let viewportUpperLeft = cameraCenter - (focusDistance * w) - 0.5 * (viewportU + viewportV)
         pixel00 = viewportUpperLeft + 0.5 * (pixelDX + pixelDY)
+        
+        // camera defocus disk basis vectors
+        let defocusRadius = focusDistance * tan(degreesToRadians(defocusAngle / 2))
+        defocusDiskU = u * defocusRadius
+        defocusDiskV = v * defocusRadius
     }
     
     // MARK: Rendering
@@ -130,7 +144,7 @@ struct Camera {
     private func getRay(_ i: Int, _ j: Int) -> Ray{
         let offset = sampleSquare()
         let pixelSample = pixel00 + (Double(i) + offset.x) * pixelDX + (Double(j) + offset.y) * pixelDY
-        let rayOrigin = cameraCenter
+        let rayOrigin = (defocusAngle <= 0) ? cameraCenter : defocusDiskSample()
         let rayDirection = (pixelSample - rayOrigin)//.normalized
         return Ray(origin: rayOrigin, direction: rayDirection)
     }
@@ -138,4 +152,25 @@ struct Camera {
         // random point in the [-.5, -.5] - [.5, .5] square
         return Vec3(randomDouble() - 0.5, randomDouble() - 0.5, 0)
     }
+    private func defocusDiskSample() -> Point3 {
+        let p = Vec3.randomInUnitDisk()
+        return cameraCenter + p.x * defocusDiskU + p.y * defocusDiskV
+    }
 }
+
+
+/*
+ Camera Center (apex of cone)
+                         ●
+                        /|\
+                       / | \
+       defocusAngle-->/  |  \
+                     /   |   \
+                    /    |    \
+                   /     |     \
+                  /      |      \
+                 /_______|_______\
+                                  
+                [defocus disk at focal distance]
+                <----- radius ---->
+ */
