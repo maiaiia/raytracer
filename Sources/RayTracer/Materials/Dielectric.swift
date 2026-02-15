@@ -5,7 +5,7 @@ struct Dielectric : Material {
         self._refractiveIndex = refractiveIndex
     }
     
-    func scatter(ray: Ray, rec: HitRecord) -> (attenuation: Vec3, scattered: Ray)? {
+    func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R: RandomNumberGenerator{
         let attenuation = Color(1.0, 1.0, 1.0) // for glass
         let refractionIndex = rec.frontFace ? 1.0 / self._refractiveIndex : self._refractiveIndex
         
@@ -17,7 +17,7 @@ struct Dielectric : Material {
          
         let cannotRefract: Bool = refractionIndex * sinTheta > 1.0
         
-        let direction = (cannotRefract && Dielectric.reflectance(cosine: cosTheta, refractiveIndex: refractionIndex) > randomDouble()) ? unitDirection.reflect(relativeTo: rec.normal) : unitDirection.refract(normal: rec.normal, etaRatio: refractionIndex)
+        let direction = (cannotRefract && Dielectric.reflectance(cosine: cosTheta, refractiveIndex: refractionIndex) > randomDouble(rng: &rng)) ? unitDirection.reflect(relativeTo: rec.normal) : unitDirection.refract(normal: rec.normal, etaRatio: refractionIndex)
         
         let scattered = Ray(origin: rec.p, direction: direction)
         return (attenuation, scattered)

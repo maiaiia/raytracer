@@ -1,3 +1,3 @@
 protocol Material {
-    func scatter(ray: Ray, rec: HitRecord) -> (attenuation: Vec3, scattered: Ray)?
+    func scatter<R: RandomNumberGenerator>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)?
 }

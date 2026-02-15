@@ -137,10 +137,24 @@ extension Vec3 {
     static func random(min: Double, max: Double) -> Vec3 {
         return Vec3(randomDouble(min: min, max: max), randomDouble(min: min, max: max), randomDouble(min: min, max: max))
     }
+    static func random<R>(min: Double, max: Double, rng: inout R) -> Vec3 where R : RandomNumberGenerator {
+        return Vec3(randomDouble(min: min, max: max, rng: &rng),
+                    randomDouble(min: min, max: max, rng: &rng),
+                    randomDouble(min: min, max: max, rng: &rng))
+    }
+    
     static func randomUnitVector() -> Vec3 {
         // generate a random unit vector using a rejection method
         while true{
             let p = Vec3.random(min: -1, max: 1)
+            if p.lengthSquared <= 1.0 && 1e-160 < p.lengthSquared{
+                return p.normalized
+            }
+        }
+    }
+    static func randomUnitVector<R>(rng: inout R) -> Vec3 where R : RandomNumberGenerator{
+        while true{
+            let p = Vec3.random(min: -1, max: 1, rng: &rng)
             if p.lengthSquared <= 1.0 && 1e-160 < p.lengthSquared{
                 return p.normalized
             }
@@ -154,9 +168,23 @@ extension Vec3 {
             return -onUnitSphere
         }
     }
+    static func randomOnHemisphere<R>(normal: Vec3, rng: inout R) -> Vec3 where R : RandomNumberGenerator{
+        let onUnitSphere = randomUnitVector(rng: &rng)
+        if onUnitSphere.dot(randomUnitVector(rng: &rng)) > 0.0 {
+            return onUnitSphere
+        } else {
+            return -onUnitSphere
+        }
+    }
     static func randomInUnitDisk() -> Vec3 {
         while true {
             let p = Vec3(randomDouble(min: -1, max: 1), randomDouble(min: -1, max: 1), 0)
+            if p.lengthSquared < 1 { return p }
+        }
+    }
+    static func randomInUnitDisk<R>(rng: inout R) -> Vec3 where R : RandomNumberGenerator{
+        while true {
+            let p = Vec3(randomDouble(min: -1, max: 1, rng: &rng), randomDouble(min: -1, max: 1, rng: &rng), 0)
             if p.lengthSquared < 1 { return p }
         }
     }

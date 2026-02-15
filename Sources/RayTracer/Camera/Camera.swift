@@ -94,19 +94,19 @@ struct Camera {
         defocusDiskV = v * defocusRadius
     }
     
-    func getRay(_ i: Int, _ j: Int) -> Ray{
-        let offset = sampleSquare()
+    func getRay<R>(_ i: Int, _ j: Int, rng: inout R) -> Ray where R: RandomNumberGenerator{
+        let offset = sampleSquare(rng: &rng)
         let pixelSample = pixel00 + (Double(i) + offset.x) * pixelDX + (Double(j) + offset.y) * pixelDY
-        let rayOrigin = (defocusAngle <= 0) ? cameraCenter : defocusDiskSample()
+        let rayOrigin = (defocusAngle <= 0) ? cameraCenter : defocusDiskSample(rng: &rng)
         let rayDirection = (pixelSample - rayOrigin)//.normalized
         return Ray(origin: rayOrigin, direction: rayDirection)
     }
-    private func sampleSquare() -> Vec3 {
+    private func sampleSquare<R>(rng: inout R) -> Vec3 where R: RandomNumberGenerator{
         // random point in the [-.5, -.5] - [.5, .5] square
-        return Vec3(randomDouble() - 0.5, randomDouble() - 0.5, 0)
+        return Vec3(randomDouble(rng: &rng) - 0.5, randomDouble(rng: &rng) - 0.5, 0)
     }
-    private func defocusDiskSample() -> Point3 {
-        let p = Vec3.randomInUnitDisk()
+    private func defocusDiskSample<R>(rng: inout R) -> Point3 where R: RandomNumberGenerator{
+        let p = Vec3.randomInUnitDisk(rng: &rng)
         return cameraCenter + p.x * defocusDiskU + p.y * defocusDiskV
     }
 }

@@ -5,9 +5,9 @@ struct Lambertian: Material {
         _albedo = albedo
     }
     
-    func scatter(ray: Ray, rec: HitRecord) -> (attenuation: Vec3, scattered: Ray)? {
+    func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R : RandomNumberGenerator{
         // strategy - always scatter
-        let randVec = Vec3.randomUnitVector()
+        let randVec = Vec3.randomUnitVector(rng: &rng)
         let scatterDirection = (rec.normal + randVec).nearZero ? rec.normal : rec.normal + randVec
         
         let scattered = Ray(origin: rec.p, direction: scatterDirection)
