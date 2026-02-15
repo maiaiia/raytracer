@@ -1,48 +1,94 @@
 import Foundation
 struct Camera {
+    // MARK: public cofiguration
+    var aspectRatio     = 1.0
+    var imageWidth      = 100
+    var samplesPerPixel = 10    // count of random samples per pixel
+    var maxDepth        = 10    // maximum number of ray bounces into scene
+    
+    var vfov        = 90                // vertical view angle (field of view)
+    var lookFrom    = Point3(0, 0, 0)   // position of camera lens
+    var lookAt      = Point3(0, 0, -1)  // point camera is looking at
+    var vUp         = Vec3(0, 1, 0)     // camera-relative "up" direction
+    
+    // MARK: private properties
     private var imageHeight:        Int         // final image height
     private var cameraCenter:       Point3      // camera center
     private var pixel00:            Point3      // location of pixel 0, 0
     private var pixelDX:            Vec3        // offset to pixel to the right
     private var pixelDY:            Vec3        // offset to pixel below
     private var pixelSamplesScale:  Double
+    private var u, v, w:            Vec3        // camera frame basis vectors
     
-    var aspectRatio     = 1.0
-    var imageWidth      = 100
-    var samplesPerPixel = 10    // count of random samples per pixel
-    var maxDepth        = 10    // maximum number of ray bounces into scene
-    var vfov            = 90    // vertical view angle (field of view)
+    // MARK: computed properties
+    var focalLength: Double {
+        (lookFrom - lookAt).length
+    }
     
-    init(aspectRatio: Double = 1.0, imageWidth: Int = 100, samplesPerPixel: Int = 10, maxDepth: Int = 10, vfov: Int = 90) {
+    // MARK: initialisation
+    init(
+        aspectRatio: Double = 1.0,
+        imageWidth: Int = 100,
+        samplesPerPixel: Int = 10,
+        maxDepth: Int = 10,
+        vfov: Int = 90,
+        lookFrom: Point3 = Point3(0, 0, 0),
+        lookAt: Point3 = Point3(0, 0, -1),
+        vUp: Vec3 = Vec3(0, 1, 0)
+    ) {
         self.aspectRatio = aspectRatio
         self.imageWidth = imageWidth
         self.samplesPerPixel = samplesPerPixel
         self.maxDepth = maxDepth
         self.vfov = vfov
+        self.lookFrom = lookFrom
+        self.lookAt = lookAt
+        self.vUp = vUp
         
+        // calculate derived values
+        cameraCenter = lookFrom
         imageHeight = Int(Double(imageWidth) / aspectRatio) < 1 ? 1 : Int(Double(imageWidth) / aspectRatio)
-        cameraCenter = Point3(0,0,0)
         pixelSamplesScale = 1.0 / Double(samplesPerPixel)
         
-        //Viewport info
-        //  dimensions
-        let focalLength = 1.0
+        // set temporary values for uninitialised properties
+        u = Vec3(0, 0, 0)
+        v = Vec3(0, 0, 0)
+        w = Vec3(0, 0, 0)
+        pixel00 = Point3(0, 0, 0)
+        pixelDY = Point3(0, 0, 0)
+        pixelDX = Point3(0, 0, 0)
+        
+        setupViewport()
+    }
+    
+    // MARK: Setup
+    private mutating func setupViewport() {
+        // viewport dimensions
+        let focalLength = (lookFrom - lookAt).length
         let theta = degreesToRadians(Double(vfov))
         let h = tan(theta / 2)
         let viewportHeight = 2 * h * focalLength
         let viewportWidth = viewportHeight * (Double(imageWidth) / Double (imageHeight))
         
-        //  rendering direction
-        let u = Vec3(viewportWidth, 0, 0)
-        let v = Vec3(0, -viewportHeight, 0)
-        //  distance between pixels
-        pixelDX = u / imageWidth
-        pixelDY = v / imageHeight
-        //  upper left pixel
-        let viewportUpperLeft = cameraCenter - Vec3(0,0,focalLength) - 0.5 * (u + v)
+        // camera basis vectors
+        w = (lookFrom - lookAt).normalized //TODO: - make sure w and vUp are not parallel!!
+        u = vUp.cross(w).normalized
+        v = w.cross(u)
+        
+        // viewport edge vectors
+        let viewportU = viewportWidth * u
+        let viewportV = viewportHeight * -v
+        
+        // distance between pixels
+        pixelDX = viewportU / imageWidth
+        pixelDY = viewportV / imageHeight
+        
+        // upper left pixel
+        let viewportUpperLeft = cameraCenter - (focalLength * w) - 0.5 * (viewportU + viewportV)
         pixel00 = viewportUpperLeft + 0.5 * (pixelDX + pixelDY)
     }
     
+    // MARK: Rendering
     func render(world: any Hittable) {
         //self.init()
         let standardError = FileHandle.standardError
@@ -62,6 +108,7 @@ struct Camera {
         standardError.write("\rDone.\n".data(using: .utf8)!)
     }
     
+    // MARK: Ray tracing
     private func rayColor(r: Ray, depth: Int, world: any Hittable) -> Color {
         if depth <= 0{
             return Color(0, 0, 0)
@@ -88,7 +135,7 @@ struct Camera {
         return Ray(origin: rayOrigin, direction: rayDirection)
     }
     private func sampleSquare() -> Vec3 {
-        // the position vector of a random point in the [-.5, -.5] - [.5, .5] square
+        // random point in the [-.5, -.5] - [.5, .5] square
         return Vec3(randomDouble() - 0.5, randomDouble() - 0.5, 0)
     }
 }
