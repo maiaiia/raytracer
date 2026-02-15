@@ -3,8 +3,7 @@ struct Camera {
     // MARK: public cofiguration
     var aspectRatio     = 1.0
     var imageWidth      = 100
-    var samplesPerPixel = 10    // count of random samples per pixel
-    var maxDepth        = 10    // maximum number of ray bounces into scene
+    var imageHeight:        Int
     
     var vfov        = 90                // vertical view angle (field of view)
     var lookFrom    = Point3(0, 0, 0)   // position of camera lens
@@ -15,11 +14,9 @@ struct Camera {
     var focusDistance   = 10.0      // distance from camera lookFrom to focus plane
     
     // MARK: private properties
-    private var imageHeight:        Int         // final image height
     private var cameraCenter:       Point3      // camera center
     private var pixel00:            Point3      // location of pixel 0, 0
     private var pixelDX, pixelDY:   Vec3        // offset to pixel to the right / below
-    private var pixelSamplesScale:  Double
     private var u, v, w:            Vec3        // camera frame basis vectors
     private var defocusDiskU:       Vec3        // defocus disk horizontal radius
     private var defocusDiskV:       Vec3        // defocus disk vertical radius
@@ -33,8 +30,6 @@ struct Camera {
     init(
         aspectRatio: Double = 1.0,
         imageWidth: Int = 100,
-        samplesPerPixel: Int = 10,
-        maxDepth: Int = 10,
         vfov: Int = 90,
         lookFrom: Point3 = Point3(0, 0, 0),
         lookAt: Point3 = Point3(0, 0, -1),
@@ -44,8 +39,6 @@ struct Camera {
     ) {
         self.aspectRatio = aspectRatio
         self.imageWidth = imageWidth
-        self.samplesPerPixel = samplesPerPixel
-        self.maxDepth = maxDepth
         self.vfov = vfov
         self.lookFrom = lookFrom
         self.lookAt = lookAt
@@ -56,7 +49,6 @@ struct Camera {
         // calculate derived values
         cameraCenter = lookFrom
         imageHeight = Int(Double(imageWidth) / aspectRatio) < 1 ? 1 : Int(Double(imageWidth) / aspectRatio)
-        pixelSamplesScale = 1.0 / Double(samplesPerPixel)
         
         // set temporary values for uninitialised properties
         u = Vec3(0, 0, 0)
@@ -102,46 +94,7 @@ struct Camera {
         defocusDiskV = v * defocusRadius
     }
     
-    // MARK: Rendering
-    func render(world: any Hittable) {
-        //self.init()
-        let standardError = FileHandle.standardError
-        print("P3\n\(imageWidth) \(imageHeight)\n255")
-        for j in 0...imageHeight-1{
-            let message = "\rScanlines remaining: \(imageHeight - j) \n"
-            standardError.write(message.data(using: .utf8)!)
-            for i in 0...imageWidth-1{
-                var pixelColor = Color(0, 0, 0)
-                for _ in 0...samplesPerPixel{
-                    let ray = self.getRay(i, j)
-                    pixelColor += self.rayColor(r: ray, depth: maxDepth, world: world)
-                }
-                writeColor(pixelColor: pixelColor * pixelSamplesScale)
-            }
-        }
-        standardError.write("\rDone.\n".data(using: .utf8)!)
-    }
-    
-    // MARK: Ray tracing
-    private func rayColor(r: Ray, depth: Int, world: any Hittable) -> Color {
-        if depth <= 0{
-            return Color(0, 0, 0)
-        }
-        if let record = world.hit(r: r, rayT: Interval(0.0001, Double.infinity)) {
-            if let scatter = record.material.scatter(ray: r, rec: record) {
-                return scatter.attenuation.hadamard(rayColor(r: scatter.scattered, depth: depth - 1, world: world))
-            } else {
-                return Color(0.0, 0.0, 0.0)
-            }
-        }
-        
-        // gradient background
-        let unitDirection = r.direction().normalized
-        let a: Double = 0.5 * (unitDirection.y + 1.0) // lerp
-        return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.6, 1.0)
-    }
-    
-    private func getRay(_ i: Int, _ j: Int) -> Ray{
+    func getRay(_ i: Int, _ j: Int) -> Ray{
         let offset = sampleSquare()
         let pixelSample = pixel00 + (Double(i) + offset.x) * pixelDX + (Double(j) + offset.y) * pixelDY
         let rayOrigin = (defocusAngle <= 0) ? cameraCenter : defocusDiskSample()
@@ -157,7 +110,6 @@ struct Camera {
         return cameraCenter + p.x * defocusDiskU + p.y * defocusDiskV
     }
 }
-
 
 /*
  Camera Center (apex of cone)

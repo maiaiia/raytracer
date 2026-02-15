@@ -4,29 +4,30 @@ func main() {
     // World
     var world: HittableList = HittableList()
     
-    let groundMaterial  = Lambertian(albedo: Color(0.8, 0.8, 0.0))
-    let centerMaterial  = Lambertian(albedo: Color(0.5, 0.6, 0.7))
-    let leftMaterial    = Dielectric.glass
-    let rightMaterial   = Metal.copper
-    
+    let groundMaterial  = Lambertian(albedo: Color(0.5, 0.5, 0.5))
     world.add(Sphere(center: Point3(0, -100.5, -1), radius: 100, material: groundMaterial))
-    world.add(Sphere(center: Point3(0, 0, -1.2), radius: 0.5, material: centerMaterial))
-    world.add(Sphere(center: Point3(-1, 0, -1), radius: 0.5, material: leftMaterial))
-    world.add(Sphere(center: Point3(1, 0, -1), radius: 0.5, material: rightMaterial))
+    world.add(Sphere(center: Point3(0, 0, -1.2), radius: 0.5, material: Lambertian(albedo: .red)))
+    world.add(Sphere(center: Point3(-1.0, 0, -1), radius: 0.5, material: Lambertian(albedo: .green)))
+    world.add(Sphere(center: Point3(1, 0, -1), radius: 0.5, material: Lambertian(albedo: .blue)))
+    world.add(Sphere(center: Point3(-0.5, -0.5, -0.5), radius: 0.2, material: Lambertian(albedo: .magenta)))
+    world.add(Sphere(center: Point3(0.5, -0.5, -0.5), radius: 0.2, material: Lambertian(albedo: .cyan)))
     
     // Render
     let camera = Camera(
         aspectRatio: 16.0 / 9.0,
         imageWidth: 400,
-        samplesPerPixel: 100,
-        maxDepth: 50,
-        vfov: 20,
-        lookFrom: Point3(-2, 2, 1),
+        vfov: 5,
+        lookFrom: Point3(1, 1, 1),
         lookAt: Point3(0, 0, -1),
-        defocusAngle: 10.0,
-        focusDistance: 3.4
+        //vUp: Vec3(0, 1, 0),
+        //defocusAngle: 0.6,
+        //focusDistance: 10.0,
     )
-    camera.render(world: world)
+    let renderer = Renderer(
+        samplesPerPixel: 200,
+        maxDepth: 50,
+    )
+    renderer.render(camera: camera, world: world)
 }
 
 main()
