@@ -1,5 +1,5 @@
 import Foundation
-typealias Color = Vec3
+public typealias Color = Vec3
 
 let intensity = Interval(0.0, 0.999)
 
@@ -20,7 +20,7 @@ func linearToGamma(_ linearComponent: Double) -> Double {
     return linearComponent > 0 ? sqrt(linearComponent) : 0.0
 }
 
-extension Color {
+public extension Color {
     static let red      = Color(1.0, 0.0, 0.0)
     static let green    = Color(0.0, 1.0, 0.0)
     static let blue     = Color(0.0, 0.0, 1.0)

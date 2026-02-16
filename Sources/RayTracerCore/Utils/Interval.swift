@@ -1,11 +1,11 @@
-struct Interval {
+public struct Interval {
     let left: Double
     let right: Double
     
     static let empty = Interval(Double.infinity, -Double.infinity)
     static let universe: Interval = .init(-Double.infinity, Double.infinity)
     
-    init() {
+    public init() {
         left = -Double.infinity
         right = Double.infinity
     }

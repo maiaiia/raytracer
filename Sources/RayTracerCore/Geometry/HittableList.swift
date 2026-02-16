@@ -1,11 +1,13 @@
 import Foundation
-struct HittableList: Hittable {
+public struct HittableList: Hittable {
     var objects: [any Hittable] = []
     
-    mutating func clear() { objects.removeAll() }
-    mutating func add(_ object: any Hittable) { objects.append(object) }
+    public init() {}
     
-    func hit(r: Ray, rayT: Interval) -> HitRecord? {
+    public mutating func clear() { objects.removeAll() }
+    public mutating func add(_ object: any Hittable) { objects.append(object) }
+    
+    public func hit(r: Ray, rayT: Interval) -> HitRecord? {
         var record: HitRecord? = nil
         var closestSoFar = rayT.right
         

@@ -1,10 +1,10 @@
 import Foundation
-struct Vec3 {
+public struct Vec3 {
     var x: Double
     var y: Double
     var z: Double
     
-    init(_ x: Double = 0, _ y: Double = 0, _ z: Double = 0) {
+    public init(_ x: Double = 0, _ y: Double = 0, _ z: Double = 0) {
         self.x = x
         self.y = y
         self.z = z
@@ -119,12 +119,12 @@ extension Vec3 {
 
 // MARK: Protocols
 extension Vec3: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         "\(x) \(y) \(z)"
     }
 }
 extension Vec3: Equatable {
-    static func == (lhs: Vec3, rhs: Vec3) -> Bool {
+    public static func == (lhs: Vec3, rhs: Vec3) -> Bool {
         lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
     }
 }
@@ -206,4 +206,4 @@ extension Vec3 {
     }
 }
 
-typealias Point3 = Vec3
+public typealias Point3 = Vec3

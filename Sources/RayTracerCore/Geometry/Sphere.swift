@@ -1,16 +1,16 @@
 import Foundation
-struct Sphere: Hittable {
+public struct Sphere: Hittable {
     private var _center:    Point3
     private var _radius:    Double
     private var _material:  any Material
     
-    init(center: Point3, radius: Double, material: Material) {
+    public init(center: Point3, radius: Double, material: Material) {
         _center = center
         _radius = radius > 0 ? radius : 0
         _material = material
     }
     
-    func hit(r: Ray, rayT: Interval) -> HitRecord? {
+    public func hit(r: Ray, rayT: Interval) -> HitRecord? {
         let OC = _center - r.origin()
         let a = r.direction().lengthSquared
         let h = r.direction().dot(OC)

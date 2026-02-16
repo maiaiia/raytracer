@@ -1,11 +1,11 @@
-struct Lambertian: Material {
+public struct Lambertian: Material {
     private var _albedo: Color
     
-    init(albedo: Color) {
+    public init(albedo: Color) {
         _albedo = albedo
     }
     
-    func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R : RandomNumberGenerator{
+    public func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R : RandomNumberGenerator{
         // strategy - always scatter
         let randVec = Vec3.randomUnitVector(rng: &rng)
         let scatterDirection = (rec.normal + randVec).nearZero ? rec.normal : rec.normal + randVec

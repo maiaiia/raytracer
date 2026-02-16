@@ -1,10 +1,10 @@
 import Foundation
 
-struct Ray {
+public struct Ray {
     private var _origin: Point3
     private var _direction: Vec3
     
-    init(origin: Point3, direction: Vec3) {
+    public init(origin: Point3, direction: Vec3) {
         self._origin = origin
         self._direction = direction
     }

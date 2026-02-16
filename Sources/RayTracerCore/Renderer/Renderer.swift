@@ -1,11 +1,11 @@
 import Foundation
 
-struct Renderer {
+public struct Renderer {
     var samplesPerPixel = 10    // count of random samples per pixel
     var maxDepth        = 10    // maximum number of ray bounces into scene
     var parallelism     = true
     
-    init(
+    public init(
         samplesPerPixel: Int = 10,
         maxDepth: Int = 10,
         parallelism: Bool = true
@@ -38,16 +38,16 @@ struct Renderer {
     
     let bucketSize = 128
     
-    func render(
+    public func render(
         camera: Camera,
-        world: any Hittable
+        world: HittableList
     ) {
         parallelism ?
             renderMultithreaded(camera: camera, world: world) :
             renderSingleThread(camera: camera, world: world)
     }
     
-    private func renderSingleThread(camera: Camera, world: any Hittable) {
+    private func renderSingleThread(camera: Camera, world: HittableList) {
         let standardError = FileHandle.standardError
         let width = camera.imageWidth
         let height = camera.imageHeight
@@ -71,7 +71,7 @@ struct Renderer {
         standardError.write("\rDone.\n".data(using: .utf8)!)
         
     }
-    private func renderMultithreaded(camera: Camera, world: any Hittable) {
+    private func renderMultithreaded(camera: Camera, world: HittableList) {
         let height = camera.imageHeight
         let width = camera.imageWidth
         

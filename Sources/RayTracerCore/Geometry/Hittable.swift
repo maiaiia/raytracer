@@ -1,7 +1,7 @@
 //design decision
 //  normals always point outward from the surface
 //  thus, the side of the surface will be determined at the time of geometry intersection
-struct HitRecord {
+public struct HitRecord {
     var p:          Point3
     var normal:     Vec3
     var t:          Double
@@ -20,6 +20,6 @@ struct HitRecord {
     
 }
 
-protocol Hittable {
+public protocol Hittable { //TODO: When i create a separate World class I should make this internal again (along ray and interval)
     func hit(r: Ray, rayT: Interval) -> HitRecord?
 }

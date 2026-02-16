@@ -1,11 +1,11 @@
 import Foundation
-struct Dielectric : Material {
+public struct Dielectric : Material {
     private var _refractiveIndex: Double
-    init(refractiveIndex: Double) {
+    public init(refractiveIndex: Double) {
         self._refractiveIndex = refractiveIndex
     }
     
-    func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R: RandomNumberGenerator{
+    public func scatter<R>(ray: Ray, rec: HitRecord, rng: inout R) -> (attenuation: Vec3, scattered: Ray)? where R: RandomNumberGenerator{
         let attenuation = Color(1.0, 1.0, 1.0) // for glass
         let refractionIndex = rec.frontFace ? 1.0 / self._refractiveIndex : self._refractiveIndex
         

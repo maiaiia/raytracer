@@ -1,5 +1,5 @@
 import Foundation
-struct Camera {
+public struct Camera {
     // MARK: public cofiguration
     var aspectRatio     = 1.0
     var imageWidth      = 100
@@ -27,7 +27,7 @@ struct Camera {
     }
     
     // MARK: initialisation
-    init(
+    public init(
         aspectRatio: Double = 1.0,
         imageWidth: Int = 100,
         vfov: Int = 90,

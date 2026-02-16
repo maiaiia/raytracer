@@ -3,15 +3,26 @@ import PackageDescription
 
 let package = Package(
     name: "raytracer",
+    platforms: [
+        .macOS(.v14)
+    ],
     products: [
+        .library(
+            name: "RayTracerCore",
+            targets: ["RayTracerCore"]
+        ),
         .executable(
-            name: "RayTracer",  // Product name
-            targets: ["RayTracer"]),
+            name: "RayTracer",
+            targets: ["RayTracerCLI"]
+        ),
     ],
     targets: [
+        .target(
+            name: "RayTracerCore"
+        ),
         .executableTarget(
-            name: "RayTracer"),
+            name: "RayTracerCLI",
+            dependencies: ["RayTracerCore"]
+        ),
     ]
 )
-
-
