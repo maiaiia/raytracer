@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		003B26092F436DDE007F8564 /* RayTracerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 003B26082F436DDE007F8564 /* RayTracerCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		003B25EC2F4349FC007F8564 /* RayTracerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RayTracerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				003B26092F436DDE007F8564 /* RayTracerCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				003B25EE2F4349FC007F8564 /* RayTracerApp */,
+				003B26072F436DDE007F8564 /* Frameworks */,
 				003B25ED2F4349FC007F8564 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +49,13 @@
 				003B25EC2F4349FC007F8564 /* RayTracerApp.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		003B26072F436DDE007F8564 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +78,7 @@
 			);
 			name = RayTracerApp;
 			packageProductDependencies = (
+				003B26082F436DDE007F8564 /* RayTracerCore */,
 			);
 			productName = RayTracerApp;
 			productReference = 003B25EC2F4349FC007F8564 /* RayTracerApp.app */;
@@ -335,6 +349,14 @@
 			relativePath = ../../raytracer;
 		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		003B26082F436DDE007F8564 /* RayTracerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 003B26002F434B86007F8564 /* XCLocalSwiftPackageReference "../../raytracer" */;
+			productName = RayTracerCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 003B25E42F4349FB007F8564 /* Project object */;
 }
