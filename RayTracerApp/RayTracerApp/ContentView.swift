@@ -22,6 +22,9 @@ struct ContentView: View {
             Spacer()
 
             HStack {
+                Button("", systemImage: "slider.horizontal.3") {
+                    
+                }
                 Button("Render") {
                     // placeholder
                 }
