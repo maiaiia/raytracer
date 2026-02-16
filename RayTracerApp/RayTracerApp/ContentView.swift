@@ -1,11 +1,5 @@
-//
-//  ContentView.swift
-//  RayTracerApp
-//
-//  Created by Maia Ungureanu on 16.02.2026.
-//
-
 import SwiftUI
+import RayTracer
 
 struct ContentView: View {
     var body: some View {

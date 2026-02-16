@@ -94,6 +94,9 @@
 			);
 			mainGroup = 003B25E32F4349FB007F8564;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				003B26002F434B86007F8564 /* XCLocalSwiftPackageReference "../../raytracer" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 003B25ED2F4349FC007F8564 /* Products */;
 			projectDirPath = "";
@@ -325,6 +328,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		003B26002F434B86007F8564 /* XCLocalSwiftPackageReference "../../raytracer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../raytracer;
+		};
+/* End XCLocalSwiftPackageReference section */
 	};
 	rootObject = 003B25E42F4349FB007F8564 /* Project object */;
 }
