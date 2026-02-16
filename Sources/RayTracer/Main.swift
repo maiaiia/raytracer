@@ -16,7 +16,7 @@ func main() {
     // Render
     let camera = Camera(
         aspectRatio: 16.0 / 9.0,
-        imageWidth: 400,
+        imageWidth: 600,
         vfov: 50,
         lookFrom: Point3(1, 1, 1),
         lookAt: Point3(0, 0, -1),
@@ -24,31 +24,34 @@ func main() {
         defocusAngle: 0.2,
         focusDistance: 1.3,
     )
+    
     let singleThreadedRenderer = Renderer(
         samplesPerPixel: 300,
         maxDepth: 50,
         parallelism: false
     )
     let multiThreadedRenderer = Renderer (
-        samplesPerPixel: 100,
+        samplesPerPixel: 300,
         maxDepth: 50,
         parallelism: true
     )
     
-    multiThreadedRenderer.render(camera: camera, world: world)
-    /*
     let startSingle = Date()
-    //singleThreadedRenderer.render(camera: camera, world: world)
+    singleThreadedRenderer.render(camera: camera, world: world)
     let endSingle = Date()
-    let endMulti = Date()
     let singleTime = endSingle.timeIntervalSince(startSingle)
-    let multiTime = endMulti.timeIntervalSince(endSingle)*/
+    FileHandle.standardError.write("\rSingle-threaded: \(singleTime) seconds\n ".data(using: .utf8)!)
     
-    /*
+    let startMulti = Date()
+    multiThreadedRenderer.render(camera: camera, world: world)
+    let endMulti = Date()
+    let multiTime = endMulti.timeIntervalSince(startMulti)
+    FileHandle.standardError.write("\rMulti-threaded: \(multiTime) seconds\n ".data(using: .utf8)!)
+    
     print("\n=== Timing Results ===")
     print("Samples per pixel: 300")
     print("Single-threaded: \(singleTime) seconds\nMulti-threaded: \(multiTime) seconds")
-    print("Speedup: \(singleTime / multiTime)x")*/
+    print("Speedup: \(singleTime / multiTime)x")
 }
 
 main()

@@ -1,13 +1,5 @@
 import Foundation
 
-class RenderBuffer {
-    var pixels: [Color]
-    init (size: Int) {
-        pixels = Array(repeating: Color(0, 0, 0), count: size)
-    }
-    // TODO - make render buffer conform to Sequence
-}
-
 struct Renderer {
     var samplesPerPixel = 10    // count of random samples per pixel
     var maxDepth        = 10    // maximum number of ray bounces into scene
@@ -44,8 +36,7 @@ struct Renderer {
     
     // MARK: Rendering
     
-    let bucketSize = 64
-    let workersPerBucket = 1
+    let bucketSize = 128
     
     func render(
         camera: Camera,
@@ -61,8 +52,8 @@ struct Renderer {
         let width = camera.imageWidth
         let height = camera.imageHeight
         
-        let renderBuffer = RenderBuffer(size: width * height)
-        var rng = SystemRandomNumberGenerator()
+        var renderBuffer = Array(repeating: Color(0, 0, 0), count: height * width)
+        var rng = XorShift64(seed: UInt64(0))
         
         for j in 0..<height{
             let message = "\rScanlines remaining: \(height - j) \n"
@@ -71,106 +62,53 @@ struct Renderer {
                 let currentPixel = j * camera.imageWidth + i
                 for _ in 0..<samplesPerPixel{
                     let ray = camera.getRay(i, j, rng: &rng)
-                    renderBuffer.pixels[currentPixel] += rayColor(r: ray, depth: maxDepth, world: world, rng: &rng)
+                    renderBuffer[currentPixel] += rayColor(r: ray, depth: maxDepth, world: world, rng: &rng)
                 }
             }
         }
         
-        //Renderer.writePPM(width: width, height: height, renderBuffer: renderBuffer, sampleCount: samplesPerPixel)
+        Renderer.writePPM(width: width, height: height, pixels: renderBuffer, sampleCount: samplesPerPixel)
         standardError.write("\rDone.\n".data(using: .utf8)!)
         
     }
     private func renderMultithreaded(camera: Camera, world: any Hittable) {
-        /*
-        data will be written in a buffer
-        in terms of parallelism i have found that the main options are bucket and progressive rendering
-        progressive rendering has actually slowed things down for me so i'll go for bucket rendering only (for now)
-         */
-        
         let height = camera.imageHeight
         let width = camera.imageWidth
-        let horizontalBuckets = Int(ceil(Double(width) / Double(bucketSize)))
-        let verticalBuckets = Int(ceil(Double(height) / Double(bucketSize)))
         
-        let bucketsGroup = DispatchGroup()
-        let bucketsQueue = DispatchQueue.global(qos: .userInitiated)
-        let renderBuffer = RenderBuffer(size: width * height)
+        var renderBuffer = Array(repeating: Color(0, 0, 0), count: height * width)
         
-        let standardError = FileHandle.standardError
-        
-        //standardError.write("\rRemaining samples: \(iterations - iteration - 1) \n".data(using: .utf8)!)
-        for x in 0..<horizontalBuckets { //TODO: handle errors
-            for y in 0..<verticalBuckets {
-                bucketsGroup.enter()
-                bucketsQueue.async {
-                    var rng = SystemRandomNumberGenerator()
-                    renderBucket(
-                        camera: camera,
+        DispatchQueue.concurrentPerform(iterations: height) { j in
+            
+            var rng = XorShift64(seed: UInt64(j + 1))
+            for i in 0..<width {
+                var pixelColor = Color.black
+                
+                for _ in 0..<samplesPerPixel {
+                    let ray = camera.getRay(i, j, rng: &rng)
+                    pixelColor += rayColor(
+                        r: ray,
+                        depth: maxDepth,
                         world: world,
-                        leftCornerX: x * self.bucketSize,
-                        leftCornerY: y * self.bucketSize,
-                        renderBuffer: renderBuffer,
-                        sampleCount: samplesPerPixel,
                         rng: &rng
                     )
-                    bucketsGroup.leave()
-                    // TODO: This is where I'd update the display
                 }
+                
+                renderBuffer[j * width + i] = pixelColor
             }
         }
-        bucketsGroup.wait()
-        
-        Renderer.writePPM(width: width, height: height, renderBuffer: renderBuffer, sampleCount: samplesPerPixel)
-        standardError.write("\rDone.\n".data(using: .utf8)!)
-    }
-    private func renderBucket<R: RandomNumberGenerator>(
-        camera: Camera,
-        world: any Hittable,
-        leftCornerX: Int,
-        leftCornerY: Int,
-        renderBuffer: RenderBuffer,
-        sampleCount: Int,
-        rng: inout R
-    ) {
-        
-        let iMax = min(leftCornerX + bucketSize, camera.imageWidth)
-        let jMax = min(leftCornerY + bucketSize, camera.imageHeight)
-        
-        let localBuffer = RenderBuffer(size: bucketSize * bucketSize)
-        
-        //let standardError = FileHandle.standardError
-        //standardError.write("\rEntering bucket \(leftCornerX) \(leftCornerY) \n".data(using: .utf8)!)
-        for j in leftCornerY..<jMax{
-            for i in leftCornerX..<iMax{
-                //let currentPixel = j * camera.imageWidth + i
-                let localPixel = (j - leftCornerY) * bucketSize + (i - leftCornerX)
-                for _ in 0..<sampleCount{
-                    let ray = camera.getRay(i, j, rng: &rng)
-                    localBuffer.pixels[localPixel] += rayColor(r: ray, depth: maxDepth, world: world, rng: &rng)
-                }
-            }
-        }
-        
-        for j in leftCornerY..<jMax {
-            for i in leftCornerX..<iMax {
-                let currentPixel = j * camera.imageWidth + i
-                let localPixel = (j - leftCornerY) * bucketSize + (i - leftCornerX)
-                renderBuffer.pixels[currentPixel] = localBuffer.pixels[localPixel]
-            }
-        }
-        
-        //standardError.write("\rBucket \(leftCornerX) \(leftCornerY) complete \n".data(using: .utf8)!)
+        Renderer.writePPM(width: width, height: height, pixels: renderBuffer, sampleCount: samplesPerPixel)
     }
     
+    // MARK: Utils
     static private func writePPM(
         width: Int,
         height: Int,
-        renderBuffer: RenderBuffer,
+        pixels: [Color],
         sampleCount: Int
     ) {
         let scale = 1.0 / Double(sampleCount)
         print("P3\n\(width) \(height)\n255")
-        for pixel in renderBuffer.pixels {
+        for pixel in pixels {
             writeColor(pixelColor: pixel * scale)
         }
     }
