@@ -76,7 +76,8 @@ public struct Renderer {
         let width = camera.imageWidth
         
         var renderBuffer = Array(repeating: Color(0, 0, 0), count: height * width)
-        
+        let standardError = FileHandle.standardError
+        standardError.write("\rTotal Scanlines: \(height) \n".data(using: .utf8)!)
         DispatchQueue.concurrentPerform(iterations: height) { j in
             
             var rng = XorShift64(seed: UInt64(j + 1))
@@ -95,6 +96,7 @@ public struct Renderer {
                 
                 renderBuffer[j * width + i] = pixelColor
             }
+            standardError.write("\rScanline \(j) done \n".data(using: .utf8)!)
         }
         Renderer.writePPM(width: width, height: height, pixels: renderBuffer, sampleCount: samplesPerPixel)
     }

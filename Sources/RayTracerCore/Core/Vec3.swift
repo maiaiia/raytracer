@@ -32,16 +32,16 @@ public struct Vec3 {
     }
     
     // MARK: Properties
-    var length: Double {
+    public var length: Double {
         return sqrt(lengthSquared)
     }
-    var lengthSquared: Double {
+    public var lengthSquared: Double {
         return x*x + y*y + z*z
     }
-    var normalized: Vec3 {
+    public var normalized: Vec3 {
         return self / length
     }
-    var nearZero: Bool {
+    public var nearZero: Bool {
         let eps = 1e-8
         return abs(x) < eps && abs(y) < eps && abs(z) < eps
     }
@@ -49,7 +49,7 @@ public struct Vec3 {
 }
 
 // MARK: Operations with Vectors
-extension Vec3 {
+public extension Vec3 {
     func dot(_ other: Vec3) -> Double {
         return x * other.x + y * other.y + z * other.z
     }
@@ -65,13 +65,13 @@ extension Vec3 {
 }
 
 // MARK: Operators
-extension Vec3 {
+public extension Vec3 {
     static prefix func - (v: Vec3) -> Vec3 {
         return Vec3(-v.x, -v.y, -v.z)
     }
 }
 
-extension Vec3 {
+public extension Vec3 {
     static func + (lhs: Vec3, rhs: Vec3) -> Vec3 {
         return Vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z)
     }
@@ -131,7 +131,7 @@ extension Vec3: Equatable {
 
 // MARK: Random utility functions
 extension Vec3 {
-    static func random() -> Vec3 {
+    public static func random() -> Vec3 {
         return Vec3(randomDouble(), randomDouble(), randomDouble())
     }
     static func random(min: Double, max: Double) -> Vec3 {
