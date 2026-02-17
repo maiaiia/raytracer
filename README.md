@@ -1,5 +1,7 @@
 # raytracer
 
+![400 spp](Images/23_400sppfinalRenderParallel.png)
+
 A physically-based ray tracer written in Swift, following the [Ray Tracing in One Weekend](https://raytracing.github.io/) series. Mostly a learning project, both for ray tracing and Swift, which I've been really enjoying for its clean syntax and ease of use.
 
 On top of the book's implementation I added better code organisation (at least tried to!!) and multithreading which gave around a 3x speedup over the single-threaded version.
